@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.crud.ithreeamcrud.MainScene">
+    <TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Tab text="Files to Sort">
+            <GridPane hgap="10" vgap="10" style="-fx-padding: 10">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="200"/>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="250"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints vgrow="ALWAYS"/>
+                    <RowConstraints vgrow="SOMETIMES" prefHeight="150"/>
+                </rowConstraints>
+                <ListView fx:id="fileListContainer" GridPane.rowSpan="2"
+                          prefWidth="300" prefHeight="400" />
+                <VBox GridPane.columnIndex="1" spacing="8"
+                      style="-fx-background-color: #f8f8f8; -fx-border-color: #ccc; -fx-padding: 10">
+                    <Label text="Move to Folder:" style="-fx-font-weight: bold; -fx-font-size: 14;"/>
+                    <ListView fx:id="folderList" >
+                        <placeholder>
+                            <Label text="No folders available"/>
+                        </placeholder>
+                    </ListView>
+                </VBox>
+                <GridPane GridPane.columnIndex="1" GridPane.rowIndex="1"
+                          hgap="10" vgap="6"
+                          style="-fx-background-color: #fafafa; -fx-border-color: #ccc; -fx-padding: 10;">
+                    <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="fileNameLabel" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Path:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="filePathLabel" text="-" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Type:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="fileTypeLabel" text="-" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <Label fx:id="fileDateLabel" text="-" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                </GridPane>
+            </GridPane>
+        </Tab>
+        <Tab text="Search Files">
+            <AnchorPane minHeight="0.0" minWidth="0.0"/>
+        </Tab>
+        <Tab text="Source Folders">
+            <VBox spacing="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <HBox spacing="5">
+                    <Button fx:id="sourceTabCreateBtn" onAction="#onCreateBtnClick_sourceTab" text="Create"/>
+                    <Button fx:id="ReadBtnSourceFolder" onAction="#onClickReadBtn" text="Read"/>
+                    <Button fx:id="updateBtnSourceFolder" onAction="#onUpdateSelectedClick" text="Update"/>
+                    <Button fx:id="deleteBtnSourceFolder" onAction="#onRemoveSelectedClick" text="Delete"/>
+                    <TextField editable="false" style="-fx-font-size: 30px;" text="I AM CRUD"
+                               HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <TableView fx:id="sourceTabTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="folderNameColumn" text="Folder Name"/>
+                        <TableColumn fx:id="pathColumn" text="Path"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+        <Tab text="Target Folders">
+            <VBox spacing="10" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <HBox spacing="5">
+                    <Button fx:id="targetTabCreateBtn" onAction="#onCreateBtnClick_targetTab" text="Create"/>
+                    <Button fx:id="ReadBtnTargetFolder" onAction="#onClickReadBtn" text="Read"/>
+                    <Button fx:id="updateBtnTargetFolder" onAction="#onUpdateSelectedClickTargetTab" text="Update"/>
+                    <Button fx:id="deleteBtnTargetFolder" onAction="#onRemoveSelectedClickTargetTab" text="Delete"/>
+                    <TextField editable="false" style="-fx-font-size: 30px;" text="I AM CRUD"
+                               HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <TableView fx:id="targetTabTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="folderNameColumnTarget" text="Folder Name"/>
+                        <TableColumn fx:id="pathColumnTarget" text="Path"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+        <Tab text="Attributes">
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
+        </Tab>
+    </TabPane>
+</AnchorPane>
