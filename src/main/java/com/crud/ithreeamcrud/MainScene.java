@@ -53,11 +53,6 @@ public class MainScene {
     }
 
     @FXML
-    protected void onRefreshBtnClick() {
-        //implement load for folders here
-    }
-
-    @FXML
     protected void onCreateBtnClick_sourceTab() {
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select a Folder");
@@ -113,9 +108,9 @@ public class MainScene {
                 }
             }
         });
-        folderData.addListener((ListChangeListener<FolderEntry>) change -> {
+        targetFolderData.addListener((ListChangeListener<FolderEntry>) change -> {
             while (change.next()) {
-                saveSourceFolders(targetFolderData);
+                saveTargetFolders(targetFolderData);
             }
         });
 
@@ -139,6 +134,7 @@ public class MainScene {
 
         sourceTabTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         loadInto(folderData);
+        loadIntoTarget(targetFolderData);
     }
 
     private static final File SAVE_FILE = new File("folderData.json");
@@ -252,8 +248,8 @@ public class MainScene {
     public Button updateBtnTargetFolder;
     public Button deleteBtnTargetFolder;
     public TableView<FolderEntry> targetTabTable;
-    public TableColumn folderNameColumnTarget;
-    public TableColumn pathColumnTarget;
+    public TableColumn<FolderEntry, String> folderNameColumnTarget;
+    public TableColumn<FolderEntry, String> pathColumnTarget;
 
 
     private final ObservableList<FolderEntry> targetFolderData = FXCollections.observableArrayList();
