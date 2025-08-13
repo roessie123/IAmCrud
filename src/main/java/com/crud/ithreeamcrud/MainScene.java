@@ -91,11 +91,13 @@ public class MainScene {
         // Link columns to FolderEntry getters
         folderNameColumn.setCellValueFactory(new PropertyValueFactory<>("folderName"));
         pathColumn.setCellValueFactory(new PropertyValueFactory<>("path"));
-
+        folderNameColumnTarget.setCellValueFactory(new PropertyValueFactory<>("folderName"));
+        pathColumnTarget.setCellValueFactory(new PropertyValueFactory<>("path"));
         // Set data list to table
         sourceTabTable.setItems(folderData);
         fileListContainer.setItems(fileData);
 
+        targetTabTable.setItems(targetFolderData);
 
         folderData.addListener((ListChangeListener<FolderEntry>) change -> {
             while (change.next()) {
@@ -111,6 +113,12 @@ public class MainScene {
                 }
             }
         });
+        folderData.addListener((ListChangeListener<FolderEntry>) change -> {
+            while (change.next()) {
+                saveSourceFolders(targetFolderData);
+            }
+        });
+
         fileListContainer.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 fileNameLabel.setText(newVal.getName());
