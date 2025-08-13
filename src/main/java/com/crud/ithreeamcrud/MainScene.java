@@ -4,6 +4,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
@@ -29,74 +32,30 @@ import java.util.stream.Stream;
 
 
 public class MainScene {
-    public Label fileNameLabel;
-    public Label filePathLabel;
-    public Label fileTypeLabel;
-    public Label fileDateLabel;
 
 
-    public MainScene() {
-
-    }
-
-
-
-    @FXML
-    private Button sourceTabCreateBtn;
-
-    private Stage getStage() {
-        return (Stage) sourceTabCreateBtn.getScene().getWindow();
-    }
-
-    private void updateSourceTable() {
-
-    }
-
-    @FXML
-    protected void onRefreshBtnClick() {
-        //implement load for folders here
-    }
-
-    @FXML
-    protected void onCreateBtnClick_sourceTab() {
-        DirectoryChooser dirChooser = new DirectoryChooser();
-        dirChooser.setTitle("Select a Folder");
-        dirChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-
-        File selectedDir = dirChooser.showDialog(getStage());
-        if (selectedDir != null) {
-            folderData.add(new FolderEntry(selectedDir.getName(), selectedDir.getAbsolutePath(), selectedDir));
-
-        }
-    }
-
-    private ArrayList<File> targetFolders;
-
-    /// ////////////////////////////////////////////////////////////
-    @FXML
-    private TableView<FolderEntry> sourceTabTable;
-
-    @FXML
-    private TableColumn<FolderEntry, String> folderNameColumn;
-
-    @FXML
-    private TableColumn<FolderEntry, String> pathColumn;
-
-    private final ObservableList<FolderEntry> folderData = FXCollections.observableArrayList();
-
+    /// ////////////////////////
+    /// Init and general
+    /// ////////////////////////
 
     @FXML
     public void initialize() {
-
-        // Link columns to FolderEntry getters
+        // inits:
+        loadInto(folderData);
+        loadIntoTarget(targetFolderData);
+        updateFilesToSearch();
+        // Link columns to getters
         folderNameColumn.setCellValueFactory(new PropertyValueFactory<>("folderName"));
         pathColumn.setCellValueFactory(new PropertyValueFactory<>("path"));
-
-        // Set data list to table
+        folderNameColumnTarget.setCellValueFactory(new PropertyValueFactory<>("folderName"));
+        pathColumnTarget.setCellValueFactory(new PropertyValueFactory<>("path"));
+        // Set Data Table Link
         sourceTabTable.setItems(folderData);
         fileListContainer.setItems(fileData);
+        targetTabTable.setItems(targetFolderData);
+        folderList.setItems(targetFolderData);
 
-
+        // Listeners:
         folderData.addListener((ListChangeListener<FolderEntry>) change -> {
             while (change.next()) {
                 saveSourceFolders(folderData);
@@ -109,6 +68,11 @@ public class MainScene {
                         deleteFilesToSearch(removedFolder.getFolder());
                     }
                 }
+            }
+        });
+        targetFolderData.addListener((ListChangeListener<FolderEntry>) change -> {
+            while (change.next()) {
+                saveTargetFolders(targetFolderData);
             }
         });
         fileListContainer.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -128,10 +92,70 @@ public class MainScene {
             }
         });
 
-
+        //Style:
         sourceTabTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        loadInto(folderData);
+        targetTabTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // Drag and drop file select tab (implemented by chatgpt):
+        fileListContainer.setOnDragDetected(event -> {
+            File selectedFile = fileListContainer.getSelectionModel().getSelectedItem();
+            if (selectedFile != null) {
+                Dragboard db = fileListContainer.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(selectedFile.getAbsolutePath());
+                db.setContent(content);
+            }
+            event.consume();
+        });
+        folderList.setOnDragOver(event -> {
+            if (event.getGestureSource() != folderList && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+        folderList.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                File fileToMove = new File(db.getString());
+                FolderEntry targetFolder = folderList.getSelectionModel().getSelectedItem();
+                if (targetFolder != null && targetFolder.getFolder().isDirectory()) {
+                    File targetFile = new File(targetFolder.getFolder(), fileToMove.getName());
+                    boolean moved = fileToMove.renameTo(targetFile);
+                    if (moved) {
+                        // Remove from file list and optionally refresh
+                        fileListContainer.getItems().remove(fileToMove);
+                    }
+                    success = moved;
+                }
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
     }
+
+    public MainScene() {
+
+    }
+
+
+    private Stage getStage() {
+        return (Stage) sourceTabCreateBtn.getScene().getWindow();
+    }
+
+    /// ////////////////////////
+    /// Files to sort tab
+    /// ////////////////////////
+    public Label fileNameLabel;
+    public Label filePathLabel;
+    public Label fileTypeLabel;
+    public Label fileDateLabel;
+    public ListView<FolderEntry> folderList;
+    @FXML private ListView<File> fileListContainer;
+
+    private ArrayList<File> targetFolders;
+
+    /// ////////////////////////////////////////////////////////////
 
     private static final File SAVE_FILE = new File("folderData.json");
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -157,22 +181,35 @@ public class MainScene {
         }
     }
 
-    @FXML
-    Button deleteBtnSourceFolder;
+    /// ///////////////////////////////////////////////////////////
+    /// Source tab
+    /// ///////////////////////////////////////////////////////////
+    @FXML private Button sourceTabCreateBtn;
+    @FXML Button deleteBtnSourceFolder;
+    @FXML Button ReadBtnSourceFolder;
+    @FXML Button updateBtnSourceFolder;
+    @FXML private TableView<FolderEntry> sourceTabTable;
+    @FXML private TableColumn<FolderEntry, String> folderNameColumn;
+    @FXML private TableColumn<FolderEntry, String> pathColumn;
 
-    @FXML
-    private void onRemoveSelectedClick() {
-        FolderEntry selected = sourceTabTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            folderData.remove(selected);
+    private final ObservableList<FolderEntry> folderData = FXCollections.observableArrayList();
+
+    private final ObservableList<File> fileData = FXCollections.observableArrayList();
+
+
+    @FXML protected void onCreateBtnClick_sourceTab() {
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select a Folder");
+        dirChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+        File selectedDir = dirChooser.showDialog(getStage());
+        if (selectedDir != null) {
+            folderData.add(new FolderEntry(selectedDir.getName(), selectedDir.getAbsolutePath(), selectedDir));
+
         }
     }
 
-    @FXML
-    Button ReadBtnSourceFolder;
-
-    @FXML
-    private void onClickReadBtn() throws IOException {
+    @FXML private void onClickReadBtn() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(CRUD_Application.class.getResource("read-meme-scene.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1280,720);
         Stage memeStage = new Stage();
@@ -181,11 +218,7 @@ public class MainScene {
         memeStage.show();
     }
 
-    @FXML
-    Button updateBtnSourceFolder;
-
-    @FXML
-    private void onUpdateSelectedClick() {
+    @FXML private void onUpdateSelectedClick() {
         FolderEntry selected = sourceTabTable.getSelectionModel().getSelectedItem();
 
         if (selected != null) {
@@ -201,15 +234,13 @@ public class MainScene {
             folderData.remove(selected);
         }
     }
-    /// ///////////////////////////////////////////////////////////
-    /// Source tab
-    /// ///////////////////////////////////////////////////////////
 
-    private final ObservableList<File> fileData = FXCollections.observableArrayList();
-
-    @FXML
-    private ListView<File> fileListContainer;
-
+    @FXML private void onRemoveSelectedClick() {
+        FolderEntry selected = sourceTabTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            folderData.remove(selected);
+        }
+    }
 
     void updateFilesToSearch(){
         folderData.forEach(folder->{
@@ -244,8 +275,8 @@ public class MainScene {
     public Button updateBtnTargetFolder;
     public Button deleteBtnTargetFolder;
     public TableView<FolderEntry> targetTabTable;
-    public TableColumn folderNameColumnTarget;
-    public TableColumn pathColumnTarget;
+    public TableColumn<FolderEntry, String> folderNameColumnTarget;
+    public TableColumn<FolderEntry, String> pathColumnTarget;
 
 
     private final ObservableList<FolderEntry> targetFolderData = FXCollections.observableArrayList();
@@ -267,15 +298,13 @@ public class MainScene {
             targetFolderData.remove(selected);
         }
     }
-    @FXML
-    private void onRemoveSelectedClickTargetTab() {
+    @FXML private void onRemoveSelectedClickTargetTab() {
         FolderEntry selected = targetTabTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
             targetFolderData.remove(selected);
         }
     }
-    @FXML
-    protected void onCreateBtnClick_targetTab() {
+    @FXML protected void onCreateBtnClick_targetTab() {
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select a Folder");
         dirChooser.setInitialDirectory(new File(System.getProperty("user.home")));
@@ -310,6 +339,4 @@ public class MainScene {
             }
         }
     }
-
-
 }

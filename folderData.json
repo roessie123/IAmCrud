@@ -1,13 +1,5 @@
 [ {
-  "folderName" : "Documents",
-  "path" : "C:\\Users\\hr\\Documents",
-  "folder" : "C:\\Users\\hr\\Documents"
-}, {
-  "folderName" : "Links",
-  "path" : "C:\\Users\\hr\\Links",
-  "folder" : "C:\\Users\\hr\\Links"
-}, {
-  "folderName" : "Searches",
-  "path" : "C:\\Users\\hr\\Searches",
-  "folder" : "C:\\Users\\hr\\Searches"
+  "folderName" : "testFolder1",
+  "path" : "C:\\Users\\hr\\testFolder1",
+  "folder" : "C:\\Users\\hr\\testFolder1"
 } ]

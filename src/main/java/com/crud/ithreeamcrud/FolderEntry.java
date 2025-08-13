@@ -31,4 +31,6 @@ public class FolderEntry {
     public File toFile() {
         return new File(path);
     }
+
+    public String toString() {return folderName;}
 }
